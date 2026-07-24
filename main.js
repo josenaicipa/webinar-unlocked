@@ -9,7 +9,11 @@ import {
   MIN_FILL_MS,
 } from './lib/registration.js';
 import { buildLazyPlayerDescriptors } from './lib/testimonials.js';
-import { shouldLoadTestimonials, shouldShowStickyCta } from './lib/ui.js';
+import {
+  runInitializersSafely,
+  shouldLoadTestimonials,
+  shouldShowStickyCta,
+} from './lib/ui.js';
 
 /** @type {typeof DEFAULT_REGISTRATION_CONFIG} */
 const REGISTRATION_CONFIG = {
@@ -138,6 +142,7 @@ function initTestimonials() {
 
     const player = document.createElement('vturb-smartplayer');
     player.id = d.elementId;
+    player.setAttribute('data-vturb-player', d.id);
     player.style.display = 'none';
     card.appendChild(player);
 
@@ -483,12 +488,19 @@ function initRegistrationSafely(attempt = 0) {
 }
 
 function boot() {
-  initYear();
-  initCountdown();
-  initAccordion();
-  initTestimonials();
-  initStickyCta();
-  window.setTimeout(() => initRegistrationSafely(), 0);
+  runInitializersSafely(
+    [
+      ['year', initYear],
+      ['countdown', initCountdown],
+      ['accordion', initAccordion],
+      ['sticky CTA', initStickyCta],
+      ['registration', () => window.setTimeout(() => initRegistrationSafely(), 0)],
+      ['testimonials', initTestimonials],
+    ],
+    (name, error) => {
+      console.error(`No se pudo inicializar: ${name}.`, error);
+    },
+  );
 }
 
 if (document.readyState === 'loading') {
