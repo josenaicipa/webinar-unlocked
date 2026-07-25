@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es" data-boot="pending" data-scene-mode="init">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="googlebot" content="noindex,nofollow">
+<title>Protocolo Unlocked | Sala orbital (experimento 3D)</title>
+<meta name="description" content="Experimento visual 3D del Protocolo Unlocked. Ruta privada, no indexada.">
+<link rel="stylesheet" href="./styles.css">
+<script type="module" src="./main.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+<header class="hud" role="banner">
+  <p class="hud__mark"><span class="hud__lock">UNLOCKED</span> <span class="hud__tag">sala orbital</span></p>
+  <p class="hud__status" data-scene-status role="status">Núcleo en espera</p>
+  <p class="hud__note">Experimento privado, no indexado</p>
+  <a class="hud__back" href="../index.html">Volver a la página principal</a>
+</header>
+
+<main id="contenido">
+
+  <section id="nucleo" class="stage" aria-labelledby="nucleo-titulo">
+    <div class="stage__canvas">
+      <canvas data-scene-canvas aria-hidden="true"></canvas>
+      <div class="stage__fallback" data-scene-fallback aria-hidden="true" hidden>
+        <span class="ring ring--a"></span><span class="ring ring--b"></span><span class="ring ring--c"></span>
+        <span class="core"></span>
+      </div>
+    </div>
+    <div class="stage__copy">
+      <p class="eyebrow">Clase en vivo y gratuita</p>
+      <h1 id="nucleo-titulo">El sistema completo para vender online sin inventario, montado frente a ti en una sola sesión.</h1>
+      <p class="lede">Producto, landing y primer anuncio conectados como un solo protocolo. Sin bodega, sin equipo y sin adivinar el siguiente paso.</p>
+      <p class="slot">Jueves 30 de julio de 2026, 8:00 PM Colombia.
+        <time datetime="2026-07-31T01:00:00Z">Inicio 8:00 PM (COT)</time>
+      </p>
+      <div class="clock" id="cuenta-3d" data-countdown>
+        <span class="clock__cell"><b data-unit="days">00</b><i>días</i></span>
+        <span class="clock__cell"><b data-unit="hours">00</b><i>horas</i></span>
+        <span class="clock__cell"><b data-unit="minutes">00</b><i>minutos</i></span>
+        <span class="clock__cell"><b data-unit="seconds">00</b><i>segundos</i></span>
+      </div>
+      <p class="clock__expired" data-countdown-expired role="status" aria-live="polite" aria-atomic="true" hidden>La transmisión ya comenzó.</p>
+      <p class="cta-row"><a class="btn btn--primary" href="#acceso">Reservar mi cupo gratis</a>
+      <a class="btn btn--ghost" href="#protocolo">Ver el protocolo</a></p>
+    </div>
+  </section>
+
+  <section id="protocolo" class="protocol" aria-labelledby="protocolo-titulo">
+    <h2 id="protocolo-titulo">Tres módulos, un solo sistema en órbita</h2>
+    <p class="section-lede">Cada pieza depende de la anterior. Por eso se explica en secuencia y no como una lista suelta.</p>
+    <ol class="protocol__list">
+      <li class="node" data-reveal data-node="1">
+        <p class="node__index">Módulo 01</p>
+        <h3>Producto ganador</h3>
+        <p>Cómo leer demanda real en el mercado colombiano y elegir un producto que ya se está vendiendo, en vez de apostar por intuición.</p>
+      </li>
+      <li class="node" data-reveal data-node="2">
+        <p class="node__index">Módulo 02</p>
+        <h3>Landing que convierte</h3>
+        <p>La estructura de página que sostiene la oferta: promesa, prueba, objeciones y un solo llamado a la acción.</p>
+      </li>
+      <li class="node" data-reveal data-node="3">
+        <p class="node__index">Módulo 03</p>
+        <h3>Primer anuncio con intención</h3>
+        <p>Cómo salir al aire con un presupuesto controlado y saber qué número mirar antes de escalar o apagar.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section id="mentor" class="mentor" aria-labelledby="mentor-titulo">
+    <figure class="mentor__figure">
+      <img src="../assets/jose-naicipa.webp" alt="Jose Naicipa, mentor del Protocolo Unlocked" width="720" height="900" loading="lazy" decoding="async">
+    </figure>
+    <div class="mentor__copy">
+      <p class="eyebrow">Quién dirige la sesión</p>
+      <h2 id="mentor-titulo">Jose Naicipa</h2>
+      <p>10 años construyendo ecommerce y enseñando el mismo proceso que usa en sus propias tiendas. La clase es práctica: se arma el sistema en vivo.</p>
+      <ul class="mentor__facts">
+        <li><b>10 años</b><span>en ecommerce</span></li>
+        <li><b>+1.000</b><span>estudiantes en 15 países</span></li>
+        <li><b>+USD 5M</b><span>en ventas generadas</span></li>
+        <li><b>2.ª</b><span>comunidad Dropi más grande entre más de 600</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="transmisiones" class="proof" aria-labelledby="transmisiones-titulo">
+    <h2 id="transmisiones-titulo">Transmisiones de personas que dejaron de improvisar</h2>
+    <p class="section-lede">Seis testimonios en video. Se cargan solo cuando entran en pantalla.</p>
+    <div class="proof__grid" id="proof-grid-3d"></div>
+  </section>
+
+  <section id="acceso" class="gate" aria-labelledby="acceso-titulo">
+    <h2 id="acceso-titulo">Reserva tu lugar en la transmisión</h2>
+    <p class="section-lede">Cupo gratuito. Te avisamos antes de que empiece.</p>
+    <form class="gate__form" data-registration method="dialog" novalidate>
+      <p class="field">
+        <label for="f-nombre">Nombre completo</label>
+        <input id="f-nombre" name="fullName" type="text" autocomplete="name" required>
+        <span class="field__error" data-error-for="fullName" role="alert"></span>
+      </p>
+      <p class="field">
+        <label for="f-email">Correo electrónico</label>
+        <input id="f-email" name="email" type="email" autocomplete="email" required>
+        <span class="field__error" data-error-for="email" role="alert"></span>
+      </p>
+      <p class="field">
+        <label for="f-wa">WhatsApp con código de país</label>
+        <input id="f-wa" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" required>
+        <span class="field__error" data-error-for="whatsapp" role="alert"></span>
+      </p>
+      <p class="field field--check">
+        <input id="f-ok" name="consent" type="checkbox" required>
+        <label for="f-ok">Acepto recibir la información de la clase por correo y WhatsApp.</label>
+        <span class="field__error" data-error-for="consent" role="alert"></span>
+      </p>
+      <p class="field field--trap" aria-hidden="true">
+        <label for="company_website">No completar</label>
+        <input id="company_website" name="company_website" type="text" tabindex="-1" autocomplete="off">
+      </p>
+      <button class="btn btn--primary btn--wide" type="submit">Reservar mi cupo gratis</button>
+      <p class="gate__msg" data-registration-message role="status" aria-live="polite"></p>
+      <p class="gate__fineprint">Conexión de registro en preparación. Tus datos permanecen en el formulario y no se envían a ningún servidor todavía.</p>
+    </form>
+  </section>
+
+  <section id="faq-3d" class="faq" aria-labelledby="faq-titulo">
+    <h2 id="faq-titulo">Preguntas rápidas</h2>
+    <div class="faq__list" data-accordion>
+      <details class="faq__item"><summary>¿Tiene costo?</summary><p>No. La clase en vivo es gratuita.</p></details>
+      <details class="faq__item"><summary>¿Necesito experiencia previa?</summary><p>No. Se explica desde cero, paso a paso.</p></details>
+      <details class="faq__item"><summary>¿Necesito inventario o bodega?</summary><p>No. El modelo se trabaja sin comprar stock por adelantado.</p></details>
+      <details class="faq__item"><summary>¿Quedará grabada?</summary><p>La sesión es en vivo. Conéctate a la hora para no perder la parte práctica.</p></details>
+      <details class="faq__item"><summary>¿Cuánto dura?</summary><p>Reserva alrededor de 90 minutos con espacio para preguntas.</p></details>
+    </div>
+  </section>
+
+  <section id="cierre" class="closing" aria-labelledby="cierre-titulo">
+    <h2 id="cierre-titulo">El núcleo se abre el 30 de julio</h2>
+    <p>Un solo horario, una sola transmisión. Deja tus datos y asegura el lugar.</p>
+    <p class="cta-row"><a class="btn btn--primary" href="#acceso">Reservar mi cupo gratis</a></p>
+  </section>
+
+</main>
+
+<footer class="foot" role="contentinfo">
+  <p>Protocolo Unlocked. Ruta experimental interna, no indexada.</p>
+  <p><a href="../index.html">Volver a la página principal</a></p>
+</footer>
+</body>
+</html>
