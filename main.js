@@ -7,7 +7,25 @@ import {
   createRegistrationClient,
   DEFAULT_REGISTRATION_CONFIG,
   MIN_FILL_MS,
+  REGISTRATION_ENDPOINT,
+  REGISTRATION_EVENT,
+  REGISTRATION_SURFACE,
 } from './lib/registration.js';
+import {
+  createAttributionTracker,
+  buildAnalyticsEvent,
+  sendAnalyticsEvent,
+  sanitizePageContext,
+} from './lib/attribution.js';
+import {
+  FIXED_WHATSAPP_GROUP_INVITE,
+  FALLBACK_THANK_YOU_PATH,
+} from './lib/post-registration.js';
+import {
+  createMetaPixelController,
+  loadClarityDeferred,
+  META_PIXEL_ID,
+} from './lib/tracking.js';
 import { buildLazyPlayerDescriptors } from './lib/testimonials.js';
 import {
   runInitializersSafely,
@@ -15,19 +33,106 @@ import {
   shouldShowStickyCta,
 } from './lib/ui.js';
 
-/** @type {typeof DEFAULT_REGISTRATION_CONFIG} */
+/** Route-level activation: webhook mode to the public metrics sink. */
 const REGISTRATION_CONFIG = {
   ...DEFAULT_REGISTRATION_CONFIG,
-  // Fail-closed defaults: pending mode, empty endpoint/WhatsApp URL.
-  mode: 'pending',
-  endpoint: '',
-  whatsappUrl: '',
-  thankYouPath: '/gracias/',
+  mode: 'webhook',
+  // Exact public registration sink (must stay literal for release verification).
+  endpoint: 'https://metrics.unlockedecom.co/api/attribution-event',
+  // Fallback confirmation page remains available; primary success dest is the fixed invite.
+  thankYouPath: FALLBACK_THANK_YOU_PATH,
+  eventName: REGISTRATION_EVENT,
+  surface: REGISTRATION_SURFACE,
 };
+
+// Keep constant import live so analytics and registration share one source of truth.
+if (REGISTRATION_CONFIG.endpoint !== REGISTRATION_ENDPOINT) {
+  throw new Error('Registration endpoint constant mismatch');
+}
 
 function pad2(n) {
   return String(n).padStart(2, '0');
 }
+
+function browserPageContext() {
+  return sanitizePageContext({
+    path: typeof location !== 'undefined' ? location.pathname + location.search : '/',
+    referrer: typeof document !== 'undefined' ? document.referrer : '',
+    title: typeof document !== 'undefined' ? document.title : '',
+  });
+}
+
+function readQueryParams() {
+  try {
+    return new URLSearchParams(typeof location !== 'undefined' ? location.search : '');
+  } catch {
+    return new URLSearchParams();
+  }
+}
+
+function readCookie(name) {
+  try {
+    const parts = String(document.cookie || '').split(';');
+    for (const part of parts) {
+      const [k, ...rest] = part.trim().split('=');
+      if (k === name) return decodeURIComponent(rest.join('=') || '');
+    }
+  } catch {
+    // ignore
+  }
+  return '';
+}
+
+/* -------------------------------------------------------------------------- */
+/* Attribution + first-party analytics                                        */
+/* -------------------------------------------------------------------------- */
+
+const attributionTracker = createAttributionTracker({
+  localStorage: typeof localStorage !== 'undefined' ? localStorage : undefined,
+  sessionStorage: typeof sessionStorage !== 'undefined' ? sessionStorage : undefined,
+});
+
+function captureLandingAttribution() {
+  /** @type {Record<string, string>} */
+  const params = {};
+  const qs = readQueryParams();
+  qs.forEach((value, key) => {
+    params[key] = value;
+  });
+  const fbc = readCookie('_fbc');
+  const fbp = readCookie('_fbp');
+  if (fbc) params.fbc = fbc;
+  if (fbp) params.fbp = fbp;
+  return attributionTracker.captureFromParams(params);
+}
+
+function trackFirstParty(eventName, extra) {
+  try {
+    const payload = buildAnalyticsEvent({
+      eventName,
+      attribution: attributionTracker.getSnapshot(),
+      page: browserPageContext(),
+      extra,
+    });
+    // Navigation-safe fire-and-forget: keepalive + rejection catch never block UX.
+    const result = sendAnalyticsEvent(REGISTRATION_ENDPOINT, payload, {
+      transport: (url, init) => {
+        const request = fetch(url, { ...init, keepalive: true });
+        if (request && typeof request.catch === 'function') {
+          return request.catch(() => null);
+        }
+        return request;
+      },
+    });
+    if (result && typeof /** @type {{ catch?: unknown }} */ (result).catch === 'function') {
+      void /** @type {Promise<unknown>} */ (result).catch(() => null);
+    }
+  } catch {
+    // never block UX
+  }
+}
+
+const metaPixel = createMetaPixelController();
 
 /* -------------------------------------------------------------------------- */
 /* Countdown                                                                  */
@@ -101,7 +206,6 @@ function initAccordion() {
       const panelId = btn.getAttribute('aria-controls');
       const panel = panelId ? document.getElementById(panelId) : null;
 
-      // Close others for clear single-open accordion behavior
       triggers.forEach((other) => {
         if (other === btn) return;
         other.setAttribute('aria-expanded', 'false');
@@ -193,33 +297,45 @@ function initTestimonials() {
     return false;
   }
 
-  let observer = null;
   if ('IntersectionObserver' in window) {
-    observer = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (considerCard(entry.target, entry.isIntersecting)) {
-            observer?.unobserve(entry.target);
+            observer.unobserve(entry.target);
           }
         }
       },
       { rootMargin: '360px 0px', threshold: 0 },
     );
     grid.querySelectorAll('.proof-card').forEach((card) => observer.observe(card));
+    // When IntersectionObserver exists, do not also register scroll/resize scanners.
+    return;
   }
 
+  // Fallback only: rAF-scheduled proximity scan without layout reads on loaded cards.
   let scanScheduled = false;
   function scanVisibleCards() {
     scanScheduled = false;
-    grid.querySelectorAll('.proof-card').forEach((card) => {
-      if (considerCard(card, false)) observer?.unobserve(card);
+    const pending = grid.querySelectorAll('.proof-card:not([data-loaded="1"])');
+    if (pending.length === 0) {
+      window.removeEventListener('scroll', requestScan);
+      window.removeEventListener('resize', requestScan);
+      return;
+    }
+    pending.forEach((card) => {
+      considerCard(card, false);
     });
+    if (grid.querySelectorAll('.proof-card:not([data-loaded="1"])').length === 0) {
+      window.removeEventListener('scroll', requestScan);
+      window.removeEventListener('resize', requestScan);
+    }
   }
 
   function requestScan() {
     if (scanScheduled) return;
     scanScheduled = true;
-    window.setTimeout(scanVisibleCards, 16);
+    window.requestAnimationFrame(scanVisibleCards);
   }
 
   requestScan();
@@ -238,6 +354,9 @@ function initRegistrationModal() {
   );
   if (!modal || !form || modal.dataset.registrationReady === '1') return;
 
+  // Idempotent even if later binding throws: never rebind listeners on retry.
+  modal.dataset.registrationReady = '1';
+
   const openers = document.querySelectorAll('.js-open-register');
   const closers = modal.querySelectorAll('[data-close-modal]');
   const statusEl = document.getElementById('form-status');
@@ -247,21 +366,41 @@ function initRegistrationModal() {
 
   let lastFocus = /** @type {HTMLElement | null} */ (null);
   let filledAt = Date.now();
+  let formStarted = false;
+  let submitLocked = false;
 
+  const GENERIC_REG_ERROR =
+    'No se pudo completar el registro. Intenta de nuevo en unos minutos.';
+
+  // Main owns navigation after success; registration client redirect is a no-op.
   const client = createRegistrationClient(REGISTRATION_CONFIG, {
     transport: (url, options) => fetch(url, options),
-    redirect: (path) => {
-      window.location.assign(path);
-    },
+    redirect: () => {},
+    attributionSnapshot: () => attributionTracker.getSnapshot(),
+    pageContext: () => browserPageContext(),
   });
 
   function getFocusable() {
     return /** @type {HTMLElement[]} */ (
       Array.from(
         modal.querySelectorAll(
-          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          'button:not([disabled]), [href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
         ),
-      ).filter((el) => !el.hasAttribute('hidden') && el.offsetParent !== null || el === form.querySelector('input'))
+      ).filter((el) => {
+        if (el.hasAttribute('hidden')) return false;
+        if (el.getAttribute('aria-hidden') === 'true') return false;
+        if (el.closest('[hidden]')) return false;
+        if (el.closest('.field--honeypot')) return false;
+        if (/** @type {HTMLButtonElement|HTMLInputElement} */ (el).disabled) return false;
+        // Visible, enabled controls only — no || escape hatch for a hidden first input.
+        if (el.offsetParent !== null) return true;
+        // position:fixed elements can have null offsetParent while still visible
+        try {
+          return typeof el.getClientRects === 'function' && el.getClientRects().length > 0;
+        } catch {
+          return false;
+        }
+      })
     );
   }
 
@@ -277,7 +416,7 @@ function initRegistrationModal() {
 
   function showFieldErrors(errors) {
     clearFieldErrors();
-    const order = ['fullName', 'email', 'whatsapp', 'consent', 'honeypot', 'timing'];
+    const order = ['fullName', 'email', 'consent', 'honeypot', 'timing'];
     let first = /** @type {HTMLElement | null} */ (null);
 
     for (const key of order) {
@@ -303,9 +442,10 @@ function initRegistrationModal() {
     if (first) first.focus();
   }
 
-  function openModal() {
+  function openModal(source) {
     lastFocus = /** @type {HTMLElement | null} */ (document.activeElement);
     filledAt = Date.now();
+    formStarted = false;
     modal.hidden = false;
     document.body.classList.add('is-modal-open');
     if (statusEl) {
@@ -313,6 +453,7 @@ function initRegistrationModal() {
       statusEl.classList.remove('is-pending', 'is-error');
     }
     clearFieldErrors();
+    trackFirstParty('modal_open', { cta: source || 'unknown' });
     const first = /** @type {HTMLElement | null} */ (
       form.querySelector('#fullName')
     );
@@ -330,7 +471,9 @@ function initRegistrationModal() {
   openers.forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      openModal();
+      const source = btn.getAttribute('data-cta') || 'unknown';
+      trackFirstParty('cta_click', { cta: source });
+      openModal(source);
     });
   });
 
@@ -340,6 +483,12 @@ function initRegistrationModal() {
       closeModal();
     });
   });
+
+  form.addEventListener('input', () => {
+    if (formStarted) return;
+    formStarted = true;
+    trackFirstParty('form_start');
+  }, { once: false });
 
   document.addEventListener('keydown', (e) => {
     if (modal.hidden) return;
@@ -367,8 +516,32 @@ function initRegistrationModal() {
     }
   });
 
+  /**
+   * @param {{ fullName?: string, email?: string, consent?: boolean } | null | undefined} retained
+   * @param {string} message
+   */
+  function showRetainedError(retained, message) {
+    if (retained) {
+      if (typeof retained.fullName === 'string') form.fullName.value = retained.fullName;
+      if (typeof retained.email === 'string') form.email.value = retained.email;
+      const consent = form.querySelector('#consent');
+      if (consent instanceof HTMLInputElement && typeof retained.consent === 'boolean') {
+        consent.checked = retained.consent;
+      }
+    }
+    if (statusEl) {
+      statusEl.textContent = message || GENERIC_REG_ERROR;
+      statusEl.classList.add('is-error');
+      statusEl.classList.remove('is-pending');
+    }
+    statusEl?.focus?.();
+    trackFirstParty('registration_error');
+  }
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (submitLocked) return;
+
     if (statusEl) {
       statusEl.textContent = '';
       statusEl.classList.remove('is-pending', 'is-error');
@@ -379,29 +552,56 @@ function initRegistrationModal() {
     const payload = {
       fullName: String(fd.get('fullName') ?? ''),
       email: String(fd.get('email') ?? ''),
-      whatsapp: String(fd.get('whatsapp') ?? ''),
       consent: fd.get('consent') === '1' || form.querySelector('#consent')?.checked === true,
       honeypot: String(fd.get('company_website') ?? ''),
       filledAt,
       submittedAt: Date.now(),
     };
 
-    if (submitBtn) submitBtn.disabled = true;
+    submitLocked = true;
+    let keepLocked = false;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.setAttribute('aria-busy', 'true');
+    }
 
     try {
-      const result = await client.submit(payload);
+      let result;
+      try {
+        result = await client.submit(payload);
+      } catch {
+        showRetainedError(
+          {
+            fullName: payload.fullName,
+            email: payload.email,
+            consent: payload.consent,
+          },
+          GENERIC_REG_ERROR,
+        );
+        return;
+      }
 
       if (result.status === 'validation_error') {
         showFieldErrors(result.errors ?? {});
+        trackFirstParty('validation_error');
+        return;
+      }
+
+      if (result.status === 'in_flight' || result.status === 'already_submitted') {
+        if (statusEl) {
+          statusEl.textContent = result.message;
+          statusEl.classList.add('is-pending');
+          statusEl.classList.remove('is-error');
+        }
+        statusEl?.focus?.();
+        keepLocked = result.status === 'already_submitted';
         return;
       }
 
       if (result.status === 'pending') {
-        // Must not clear fields; show honest message; no network was issued by client.
         if (result.retained) {
           form.fullName.value = result.retained.fullName;
           form.email.value = result.retained.email;
-          form.whatsapp.value = result.retained.whatsapp;
           const consent = form.querySelector('#consent');
           if (consent instanceof HTMLInputElement) {
             consent.checked = result.retained.consent;
@@ -417,21 +617,44 @@ function initRegistrationModal() {
       }
 
       if (result.status === 'error') {
-        if (statusEl) {
-          statusEl.textContent = result.message;
-          statusEl.classList.add('is-error');
-          statusEl.classList.remove('is-pending');
-        }
+        showRetainedError(result.retained, result.message || GENERIC_REG_ERROR);
         return;
       }
 
-      // success handled via redirect seam
+      if (result.status === 'success') {
+        const eventId = result.eventId || '';
+        // Order: confirmed Meta Lead (once, with eventID) → privacy-safe analytics → fixed invite.
+        // Destination is the owner-supplied constant only — never query/form/API/storage/referrer.
+        metaPixel.trackLead({
+          registrationConfirmed: true,
+          isThankYouDirectVisit: false,
+          eventId,
+        });
+        trackFirstParty('registration_success', { event_id: eventId });
+        keepLocked = true;
+        window.location.assign(FIXED_WHATSAPP_GROUP_INVITE);
+        return;
+      }
+
+      // Terminal unknown-status branch: accessible error, retain fields, unlock.
+      showRetainedError(
+        result?.retained || {
+          fullName: payload.fullName,
+          email: payload.email,
+          consent: payload.consent,
+        },
+        GENERIC_REG_ERROR,
+      );
     } finally {
-      if (submitBtn) submitBtn.disabled = false;
+      if (!keepLocked) {
+        submitLocked = false;
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.removeAttribute('aria-busy');
+        }
+      }
     }
   });
-
-  modal.dataset.registrationReady = '1';
 }
 
 /* -------------------------------------------------------------------------- */
@@ -457,7 +680,7 @@ function initStickyCta() {
   function requestUpdate() {
     if (scheduled) return;
     scheduled = true;
-    window.setTimeout(update, 16);
+    window.requestAnimationFrame(update);
   }
 
   update();
@@ -476,6 +699,14 @@ function initYear() {
   if (el) el.textContent = String(new Date().getFullYear());
 }
 
+function initAttributionBoot() {
+  captureLandingAttribution();
+  trackFirstParty('page_view');
+  // Meta PageView is emitted by the head snippet; controller is available for Lead.
+  void META_PIXEL_ID;
+  loadClarityDeferred();
+}
+
 function initRegistrationSafely(attempt = 0) {
   try {
     initRegistrationModal();
@@ -491,6 +722,7 @@ function boot() {
   runInitializersSafely(
     [
       ['year', initYear],
+      ['attribution', initAttributionBoot],
       ['countdown', initCountdown],
       ['accordion', initAccordion],
       ['sticky CTA', initStickyCta],
@@ -514,4 +746,7 @@ export {
   TARGET_INSTANT_ISO,
   MIN_FILL_MS,
   REGISTRATION_CONFIG,
+  REGISTRATION_ENDPOINT,
+  FIXED_WHATSAPP_GROUP_INVITE,
+  FALLBACK_THANK_YOU_PATH,
 };

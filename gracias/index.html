@@ -3,14 +3,58 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Confirmación de registro para Protocolo Unlocked." />
-    <title>Registro recibido — Protocolo Unlocked</title>
+    <meta
+      name="description"
+      content="Confirmación de registro: Protocolo Unlocked, jueves 30 de julio de 2026, 8:00 PM Colombia."
+    />
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href="https://webinar.unlockedecom.co/gracias/" />
+    <meta property="og:title" content="Registro confirmado — Protocolo Unlocked" />
+    <meta
+      property="og:description"
+      content="Guarda la fecha: jueves 30 de julio de 2026 a las 8:00 PM, hora de Colombia."
+    />
+    <title>Registro confirmado — Protocolo Unlocked</title>
     <link rel="stylesheet" href="../styles.css" />
     <link rel="icon" href="../assets/unlocked-mark.webp" type="image/webp" />
+    <!-- Meta Pixel present for PageView consistency; Lead is NOT fired on direct /gracias/ visits -->
+    <script>
+      !(function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = !0;
+        n.version = '2.0';
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = !0;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '4207040806214515');
+      fbq('track', 'PageView');
+    </script>
+    <noscript
+      ><img
+        height="1"
+        width="1"
+        style="display: none"
+        alt=""
+        src="https://www.facebook.com/tr?id=4207040806214515&ev=PageView&noscript=1"
+    /></noscript>
   </head>
   <body class="thanks-page">
     <main class="thanks-page__main">
-      <section class="thanks-card" aria-labelledby="thanks-title">
+      <section
+        class="thanks-card"
+        aria-labelledby="thanks-title"
+        data-webinar-start="2026-07-31T01:00:00Z"
+        data-webinar-end="2026-07-31T02:00:00Z"
+      >
         <a class="brand thanks-card__brand" href="../" aria-label="Volver a Protocolo Unlocked">
           <img
             class="brand__mark"
@@ -22,20 +66,79 @@
           <span class="brand__text">Unlocked Ecom</span>
         </a>
         <p class="eyebrow">Protocolo Unlocked</p>
-        <h1 id="thanks-title">Tu registro fue recibido</h1>
+        <h1 id="thanks-title">Registro confirmado</h1>
         <p class="thanks-card__lead">
-          Guarda la fecha: jueves 30 de julio de 2026 a las 8:00 PM, hora de Colombia.
+          Tu lugar en la clase en vivo quedó registrado. Guarda la fecha:
+          <strong
+            ><time datetime="2026-07-31T01:00:00Z"
+              >jueves 30 de julio de 2026 a las 8:00 PM, hora de Colombia</time
+            ></strong
+          >.
         </p>
-        <div class="thanks-card__action" data-whatsapp-url="">
-          <button class="btn btn--primary btn--block" type="button" disabled aria-disabled="true">
-            Entrar al grupo de WhatsApp
-          </button>
-          <p role="status">
-            El enlace del grupo todavía está pendiente. Lo habilitaremos aquí cuando quede confirmado.
+        <p class="thanks-card__note">
+          Esta página es tu confirmación en el navegador. No afirmamos entrega automática
+          por un canal de mensajes concreto.
+        </p>
+        <div class="thanks-card__actions">
+          <a
+            class="btn btn--primary btn--block"
+            id="gcal-link"
+            href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Protocolo%20Unlocked%20%E2%80%94%20Clase%20en%20vivo&amp;dates=20260731T010000Z%2F20260731T020000Z&amp;details=Clase%20en%20vivo%20Protocolo%20Unlocked.%20Jueves%2030%20de%20julio%20de%202026%2C%208%3A00%20PM%20hora%20de%20Colombia.%20En%20vivo%20y%20sin%20costo%20de%20inscripci%C3%B3n.&amp;location=En%20vivo%20en%20l%C3%ADnea"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Añadir a Google Calendar
+          </a>
+          <a
+            class="btn btn--ghost btn--block"
+            id="ics-download"
+            hidden
+            aria-disabled="true"
+          >
+            Descargar archivo ICS
+          </a>
+          <p class="thanks-card__ics-note" id="ics-fallback">
+            La descarga del archivo ICS requiere JavaScript. Sin él, usa el enlace de Google
+            Calendar de arriba para guardar la fecha.
           </p>
         </div>
         <a class="thanks-card__back" href="../">Volver a la información del webinar</a>
       </section>
     </main>
+    <script type="module">
+      import {
+        buildGoogleCalendarUrl,
+        buildIcsDataUri,
+      } from '../lib/calendar.js';
+      import { createMetaPixelController } from '../lib/tracking.js';
+
+      const gcal = document.getElementById('gcal-link');
+      if (gcal) gcal.href = buildGoogleCalendarUrl();
+
+      const ics = document.getElementById('ics-download');
+      const icsFallback = document.getElementById('ics-fallback');
+      if (ics) {
+        try {
+          const uri = buildIcsDataUri();
+          if (uri && uri.startsWith('data:text/calendar')) {
+            ics.href = uri;
+            ics.setAttribute('download', 'protocolo-unlocked.ics');
+            ics.hidden = false;
+            ics.removeAttribute('aria-disabled');
+            if (icsFallback) icsFallback.hidden = true;
+          }
+        } catch {
+          // Keep honest no-JS / failure copy; never enable a broken # download.
+        }
+      }
+
+      // Never fire Lead on a direct /gracias/ visit.
+      // Lead already fires once on the landing after confirmed registration;
+      // this page only records a fail-closed no-op for direct visits.
+      createMetaPixelController().trackLead({
+        registrationConfirmed: false,
+        isThankYouDirectVisit: true,
+      });
+    </script>
   </body>
 </html>

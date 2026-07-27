@@ -242,6 +242,27 @@ a:hover {
   width: 100%;
 }
 
+.btn--ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.25rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--ivory);
+  font-family: var(--font-body);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn--ghost:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
 /* Hero */
 .hero {
   padding: var(--space-5) 0 var(--space-6);
@@ -296,6 +317,33 @@ a:hover {
   color: var(--ivory-muted);
   font-size: 1.1rem;
   max-width: 38ch;
+}
+
+.hero__takeaways {
+  list-style: none;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+  max-width: 42ch;
+}
+
+.hero__takeaways li {
+  position: relative;
+  padding-left: 1.15rem;
+  color: var(--ivory-muted);
+  font-size: 0.98rem;
+  line-height: 1.45;
+}
+
+.hero__takeaways li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 0.45rem;
+  height: 0.45rem;
+  background: var(--gold);
 }
 
 .hero__meta {
@@ -1041,10 +1089,24 @@ a:hover {
   color: var(--gold);
 }
 
+.modal__microcopy {
+  margin: 0 0 var(--space-2);
+  color: var(--ivory-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
 /* Form */
 .register-form {
   display: grid;
   gap: 1rem;
+}
+
+.form-footnote {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ivory-dim);
+  line-height: 1.4;
 }
 
 .field {
@@ -1192,9 +1254,27 @@ a:hover {
 }
 
 .thanks-card__lead {
-  margin: 0 0 var(--space-4);
+  margin: 0 0 var(--space-2);
   color: var(--ivory-muted);
   font-size: 1.08rem;
+}
+
+.thanks-card__iso {
+  display: inline-block;
+  font-size: 0.88rem;
+  color: var(--ivory-dim);
+}
+
+.thanks-card__note {
+  margin: 0 0 var(--space-4);
+  color: var(--ivory-dim);
+  font-size: 0.92rem;
+}
+
+.thanks-card__actions {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: var(--space-2);
 }
 
 .thanks-card__action {
@@ -1212,6 +1292,14 @@ a:hover {
 .thanks-card__back {
   display: inline-block;
   margin-top: var(--space-3);
+}
+
+.final-cta__note {
+  margin: var(--space-2) 0 0;
+  color: var(--ivory-dim);
+  font-size: 0.92rem;
+  max-width: 36rem;
+  margin-inline: auto;
 }
 
 /* Reduced motion */
