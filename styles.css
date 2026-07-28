@@ -383,6 +383,48 @@ a:hover {
   color: var(--ivory-dim);
 }
 
+/*
+ * Hero CTA block: primary button + event details + trust copy, placed right
+ * after the lead paragraph so the whole block is visible without scrolling on
+ * desktop 1440x900 and mobile 390x844.
+ */
+.hero__actions {
+  margin: 0 0 var(--space-3);
+}
+
+.hero__actions .hero__meta {
+  margin: var(--space-3) 0 0;
+}
+
+/* Keep the full CTA block above the fold on phones (390x844). */
+@media (max-width: 559px) {
+  .hero {
+    padding-top: var(--space-3);
+  }
+
+  .hero h1 {
+    max-width: none;
+  }
+
+  .lead {
+    max-width: none;
+    margin-bottom: var(--space-2);
+    font-size: 1.02rem;
+  }
+
+  .hero__actions .hero__meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem 1rem;
+    padding-block: 0.75rem;
+    margin-top: var(--space-2);
+  }
+
+  .hero__actions .trust-note {
+    margin-top: 0.75rem;
+    font-size: 0.84rem;
+  }
+}
+
 /* Editorial protocol diagram */
 .protocol-diagram {
   margin: 0;

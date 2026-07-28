@@ -102,34 +102,35 @@
               y necesitan un orden ejecutable: qué vender, cómo presentarlo y cómo anunciarlo
               sin improvisar cada paso.
             </p>
-            <ul class="hero__takeaways" aria-label="Qué te llevas de la clase">
-              <li>Un filtro claro para elegir producto con demanda y margen viable</li>
-              <li>La estructura de una landing que explica la oferta y guía una sola acción</li>
-              <li>Cómo alinear el primer anuncio con tu producto y tu página</li>
-            </ul>
-            <ul class="hero__meta" aria-label="Datos de la clase">
-              <li>
-                <span class="meta-label">Fecha</span>
-                <span>Jueves 30 de julio 2026</span>
-              </li>
-              <li>
-                <span class="meta-label">Hora</span>
-                <span>8:00 PM · Colombia</span>
-              </li>
-              <li>
-                <span class="meta-label">Formato</span>
-                <span>En vivo · sin costo</span>
-              </li>
-            </ul>
+            <!-- Primary CTA sits directly after the lead so it is visible without scrolling. -->
             <div class="hero__actions">
               <button type="button" class="btn btn--primary js-open-register" data-cta="hero">
                 Reservar mi cupo gratis
               </button>
+              <ul class="hero__meta" aria-label="Datos de la clase">
+                <li>
+                  <span class="meta-label">Fecha</span>
+                  <span>Jueves 30 de julio 2026</span>
+                </li>
+                <li>
+                  <span class="meta-label">Hora</span>
+                  <span>8:00 PM · Colombia</span>
+                </li>
+                <li>
+                  <span class="meta-label">Formato</span>
+                  <span>En vivo · sin costo</span>
+                </li>
+              </ul>
               <p class="trust-note">
                 Registro gratuito. Sin promesas de resultados inventados — solo el protocolo
                 que usamos en Unlocked Ecom.
               </p>
             </div>
+            <ul class="hero__takeaways" aria-label="Qué te llevas de la clase">
+              <li>Un filtro claro para elegir producto con demanda y margen viable</li>
+              <li>La estructura de una landing que explica la oferta y guía una sola acción</li>
+              <li>Cómo alinear el primer anuncio con tu producto y tu página</li>
+            </ul>
           </div>
           <aside class="hero__visual" aria-label="Diagrama del protocolo">
             <figure class="protocol-diagram">
@@ -605,7 +606,7 @@
       </div>
     </footer>
 
-    <!-- Sticky mobile CTA -->
+    <!-- Sticky mobile CTA: appears after the above-the-fold hero CTA leaves view. -->
     <div class="sticky-cta" id="sticky-cta" hidden>
       <button type="button" class="btn btn--primary sticky-cta__btn js-open-register" data-cta="sticky">
         Reservar mi cupo gratis

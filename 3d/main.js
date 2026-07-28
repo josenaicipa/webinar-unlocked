@@ -5,8 +5,7 @@ import {
 import {
   createRegistrationClient,
   DEFAULT_REGISTRATION_CONFIG,
-  WEBINAR_REGISTRATION_ENDPOINT,
-} from './registration.js';
+} from '../lib/registration.js';
 import { buildLazyPlayerDescriptors } from '../lib/testimonials.js';
 import {
   runInitializersSafely,
@@ -21,14 +20,10 @@ const reducedMotion =
 
 const REGISTRATION_CONFIG = {
   ...DEFAULT_REGISTRATION_CONFIG,
-  mode: 'webhook',
-  endpoint: WEBINAR_REGISTRATION_ENDPOINT,
+  mode: 'pending',
+  endpoint: '',
   whatsappUrl: '',
   thankYouPath: '/gracias/',
-  webinarId: '84076939284',
-  webinarFecha: '2026-07-30',
-  webinarHora: '20:00 COT',
-  source: 'webinar.unlockedecom.co/3d',
 };
 
 function pad2(value) {
@@ -267,8 +262,6 @@ function initRegistration() {
 
   const client = createRegistrationClient(REGISTRATION_CONFIG);
   const filledAt = Date.now();
-  let formSubmitting = false;
-  let formCompleted = false;
 
   function clearErrors() {
     form.querySelectorAll('.field').forEach((field) => field.classList.remove('is-invalid'));
@@ -301,8 +294,6 @@ function initRegistration() {
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (formSubmitting) return;
-    formSubmitting = true;
     clearErrors();
     const data = new FormData(form);
     const consent = form.elements.namedItem('consent');
@@ -320,10 +311,6 @@ function initRegistration() {
         submittedAt: Date.now(),
       });
 
-      if (result.status === 'success') {
-        formCompleted = true;
-      }
-
       if (result.status === 'validation_error') {
         showErrors(result.errors);
       } else {
@@ -335,8 +322,7 @@ function initRegistration() {
       message.textContent = 'No se pudo procesar tu registro. Inténtalo de nuevo.';
       message.classList.add('is-error');
     } finally {
-      formSubmitting = false;
-      if (!formCompleted && submit) submit.disabled = false;
+      if (submit) submit.disabled = false;
     }
   });
 }

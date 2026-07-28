@@ -16,6 +16,7 @@ import {
   buildAnalyticsEvent,
   sendAnalyticsEvent,
   sanitizePageContext,
+  ANALYTICS_ENDPOINT,
 } from './lib/attribution.js';
 import {
   FIXED_WHATSAPP_GROUP_INVITE,
@@ -33,12 +34,12 @@ import {
   shouldShowStickyCta,
 } from './lib/ui.js';
 
-/** Route-level activation: webhook mode to the public metrics sink. */
+/** Route-level activation: webhook mode to the active n8n registration workflow. */
 const REGISTRATION_CONFIG = {
   ...DEFAULT_REGISTRATION_CONFIG,
   mode: 'webhook',
   // Exact public registration sink (must stay literal for release verification).
-  endpoint: 'https://metrics.unlockedecom.co/api/attribution-event',
+  endpoint: 'https://n8n.unlockedacademy.co/webhook/webinar-registro-vsl',
   // Fallback confirmation page remains available; primary success dest is the fixed invite.
   thankYouPath: FALLBACK_THANK_YOU_PATH,
   eventName: REGISTRATION_EVENT,
@@ -114,8 +115,10 @@ function trackFirstParty(eventName, extra) {
       page: browserPageContext(),
       extra,
     });
+    // Privacy boundary: analytics has its own sink. Registration identity is only
+    // ever POSTed to REGISTRATION_ENDPOINT, never to the analytics host.
     // Navigation-safe fire-and-forget: keepalive + rejection catch never block UX.
-    const result = sendAnalyticsEvent(REGISTRATION_ENDPOINT, payload, {
+    const result = sendAnalyticsEvent(ANALYTICS_ENDPOINT, payload, {
       transport: (url, init) => {
         const request = fetch(url, { ...init, keepalive: true });
         if (request && typeof request.catch === 'function') {
@@ -660,7 +663,7 @@ function initRegistrationModal() {
         }
         // Order: confirmed Meta Lead (once, with eventID) → privacy-safe analytics → fixed invite.
         // Destination is the owner-supplied constant only — never query/form/API/storage/referrer.
-        // Instagram username is never sent to analytics/logs — only the metrics registration POST.
+        // Instagram username is never sent to analytics/logs — only the n8n registration POST.
         metaPixel.trackLead({
           registrationConfirmed: true,
           isThankYouDirectVisit: false,
