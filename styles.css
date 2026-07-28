@@ -1120,6 +1120,13 @@ a:hover {
   color: var(--ivory);
 }
 
+.field__hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ivory-dim);
+  line-height: 1.35;
+}
+
 .field input[type="text"],
 .field input[type="email"],
 .field input[type="tel"] {

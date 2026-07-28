@@ -416,7 +416,7 @@ function initRegistrationModal() {
 
   function showFieldErrors(errors) {
     clearFieldErrors();
-    const order = ['fullName', 'email', 'instagramUsername', 'consent', 'honeypot', 'timing'];
+    const order = ['fullName', 'email', 'phone', 'instagramUsername', 'consent', 'honeypot', 'timing'];
     let first = /** @type {HTMLElement | null} */ (null);
 
     for (const key of order) {
@@ -445,6 +445,7 @@ function initRegistrationModal() {
   function clearRegistrationFields() {
     if (form.fullName) form.fullName.value = '';
     if (form.email) form.email.value = '';
+    if (form.phone) form.phone.value = '';
     if (form.instagramUsername) form.instagramUsername.value = '';
     const consent = form.querySelector('#consent');
     if (consent instanceof HTMLInputElement) consent.checked = false;
@@ -528,6 +529,7 @@ function initRegistrationModal() {
    * @param {{
    *   fullName?: string,
    *   email?: string,
+   *   phone?: string,
    *   instagramUsername?: string,
    *   consent?: boolean,
    * } | null | undefined} retained
@@ -537,6 +539,9 @@ function initRegistrationModal() {
     if (retained) {
       if (typeof retained.fullName === 'string') form.fullName.value = retained.fullName;
       if (typeof retained.email === 'string') form.email.value = retained.email;
+      if (typeof retained.phone === 'string' && form.phone) {
+        form.phone.value = retained.phone;
+      }
       if (typeof retained.instagramUsername === 'string' && form.instagramUsername) {
         form.instagramUsername.value = retained.instagramUsername;
       }
@@ -568,7 +573,8 @@ function initRegistrationModal() {
     const payload = {
       fullName: String(fd.get('fullName') ?? ''),
       email: String(fd.get('email') ?? ''),
-      // Instagram is registration-only identity; never put in URL/query/localStorage/analytics.
+      // Registration-only identity fields (never URL, query, browser storage, or analytics).
+      phone: String(fd.get('phone') ?? ''),
       instagramUsername: String(fd.get('instagramUsername') ?? ''),
       consent: fd.get('consent') === '1' || form.querySelector('#consent')?.checked === true,
       honeypot: String(fd.get('company_website') ?? ''),
@@ -592,6 +598,7 @@ function initRegistrationModal() {
           {
             fullName: payload.fullName,
             email: payload.email,
+            phone: payload.phone,
             instagramUsername: payload.instagramUsername,
             consent: payload.consent,
           },
@@ -621,6 +628,9 @@ function initRegistrationModal() {
         if (result.retained) {
           form.fullName.value = result.retained.fullName;
           form.email.value = result.retained.email;
+          if (form.phone && typeof result.retained.phone === 'string') {
+            form.phone.value = result.retained.phone;
+          }
           if (form.instagramUsername && typeof result.retained.instagramUsername === 'string') {
             form.instagramUsername.value = result.retained.instagramUsername;
           }
@@ -667,6 +677,7 @@ function initRegistrationModal() {
         result?.retained || {
           fullName: payload.fullName,
           email: payload.email,
+          phone: payload.phone,
           instagramUsername: payload.instagramUsername,
           consent: payload.consent,
         },
