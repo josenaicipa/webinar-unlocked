@@ -344,7 +344,7 @@
             <p class="entrada__price">Acceso gratuito</p>
             <p>
               Esta edición en vivo de <strong>Protocolo Unlocked</strong> no tiene costo
-              de inscripción. Reserva tu lugar con nombre y correo; al confirmar verás
+              de inscripción. Reserva tu lugar con nombre, correo y usuario de Instagram; al confirmar verás
               la fecha exacta y podrás guardarla en tu calendario.
             </p>
             <p class="entrada__note">
@@ -556,7 +556,7 @@
               </h3>
               <div class="faq__panel" id="faq-panel-8" role="region" aria-labelledby="faq-btn-8" hidden>
                 <p>
-                  Unlocked Ecom puede usar tu nombre y correo solo para gestionar el registro
+                  Unlocked Ecom puede usar tu nombre, correo y usuario de Instagram solo para gestionar el registro
                   de esta clase y comunicaciones directamente relacionadas con Protocolo Unlocked.
                 </p>
               </div>
@@ -571,7 +571,7 @@
           <h2 id="final-cta-title">Reserva tu lugar en Protocolo Unlocked</h2>
           <p>
             Jueves 30 de julio 2026 · 8:00 PM Colombia · En vivo y sin costo de inscripción.
-            Toma dos minutos: nombre, correo y confirmación.
+            Toma dos minutos: nombre, correo, usuario de Instagram y confirmación.
           </p>
           <button type="button" class="btn btn--primary btn--lg js-open-register" data-cta="final">
             Reservar mi cupo gratis
@@ -630,7 +630,7 @@
           </button>
         </header>
         <p class="modal__microcopy" id="modal-microcopy">
-          Clase en vivo · jueves 30 de julio 2026 · 8:00 PM Colombia. Solo nombre y correo.
+          Clase en vivo · jueves 30 de julio 2026 · 8:00 PM Colombia. Nombre, correo y usuario de Instagram.
         </p>
         <form id="register-form" class="register-form" novalidate aria-describedby="modal-microcopy">
           <div class="field">
@@ -659,6 +659,22 @@
             />
             <p class="field__error" id="error-email" role="alert" hidden></p>
           </div>
+          <div class="field">
+            <label for="instagramUsername">Usuario de Instagram</label>
+            <input
+              id="instagramUsername"
+              name="instagramUsername"
+              type="text"
+              autocomplete="username"
+              inputmode="text"
+              spellcheck="false"
+              required
+              maxlength="31"
+              placeholder="@tuusuario"
+              aria-describedby="error-instagramUsername"
+            />
+            <p class="field__error" id="error-instagramUsername" role="alert" hidden></p>
+          </div>
           <div class="field field--checkbox">
             <input
               id="consent"
@@ -670,7 +686,7 @@
               aria-describedby="error-consent"
             />
             <label for="consent">
-              Acepto que Unlocked Ecom use mi nombre y correo solo para gestionar el registro
+              Acepto que Unlocked Ecom use mi nombre, correo y usuario de Instagram solo para gestionar el registro
               de esta clase y comunicaciones directamente relacionadas con Protocolo Unlocked.
             </label>
             <p class="field__error" id="error-consent" role="alert" hidden></p>
@@ -692,7 +708,7 @@
           </button>
           <p class="form-footnote">
             Al confirmar, verás la página de confirmación con la fecha exacta. No pedimos
-            otros canales de contacto en este formulario.
+            teléfono en este formulario.
           </p>
         </form>
       </div>

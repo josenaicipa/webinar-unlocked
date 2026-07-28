@@ -416,7 +416,7 @@ function initRegistrationModal() {
 
   function showFieldErrors(errors) {
     clearFieldErrors();
-    const order = ['fullName', 'email', 'consent', 'honeypot', 'timing'];
+    const order = ['fullName', 'email', 'instagramUsername', 'consent', 'honeypot', 'timing'];
     let first = /** @type {HTMLElement | null} */ (null);
 
     for (const key of order) {
@@ -440,6 +440,14 @@ function initRegistrationModal() {
       if (!first && input instanceof HTMLElement) first = input;
     }
     if (first) first.focus();
+  }
+
+  function clearRegistrationFields() {
+    if (form.fullName) form.fullName.value = '';
+    if (form.email) form.email.value = '';
+    if (form.instagramUsername) form.instagramUsername.value = '';
+    const consent = form.querySelector('#consent');
+    if (consent instanceof HTMLInputElement) consent.checked = false;
   }
 
   function openModal(source) {
@@ -517,13 +525,21 @@ function initRegistrationModal() {
   });
 
   /**
-   * @param {{ fullName?: string, email?: string, consent?: boolean } | null | undefined} retained
+   * @param {{
+   *   fullName?: string,
+   *   email?: string,
+   *   instagramUsername?: string,
+   *   consent?: boolean,
+   * } | null | undefined} retained
    * @param {string} message
    */
   function showRetainedError(retained, message) {
     if (retained) {
       if (typeof retained.fullName === 'string') form.fullName.value = retained.fullName;
       if (typeof retained.email === 'string') form.email.value = retained.email;
+      if (typeof retained.instagramUsername === 'string' && form.instagramUsername) {
+        form.instagramUsername.value = retained.instagramUsername;
+      }
       const consent = form.querySelector('#consent');
       if (consent instanceof HTMLInputElement && typeof retained.consent === 'boolean') {
         consent.checked = retained.consent;
@@ -552,6 +568,8 @@ function initRegistrationModal() {
     const payload = {
       fullName: String(fd.get('fullName') ?? ''),
       email: String(fd.get('email') ?? ''),
+      // Instagram is registration-only identity; never put in URL/query/localStorage/analytics.
+      instagramUsername: String(fd.get('instagramUsername') ?? ''),
       consent: fd.get('consent') === '1' || form.querySelector('#consent')?.checked === true,
       honeypot: String(fd.get('company_website') ?? ''),
       filledAt,
@@ -574,6 +592,7 @@ function initRegistrationModal() {
           {
             fullName: payload.fullName,
             email: payload.email,
+            instagramUsername: payload.instagramUsername,
             consent: payload.consent,
           },
           GENERIC_REG_ERROR,
@@ -602,6 +621,9 @@ function initRegistrationModal() {
         if (result.retained) {
           form.fullName.value = result.retained.fullName;
           form.email.value = result.retained.email;
+          if (form.instagramUsername && typeof result.retained.instagramUsername === 'string') {
+            form.instagramUsername.value = result.retained.instagramUsername;
+          }
           const consent = form.querySelector('#consent');
           if (consent instanceof HTMLInputElement) {
             consent.checked = result.retained.consent;
@@ -623,8 +645,12 @@ function initRegistrationModal() {
 
       if (result.status === 'success') {
         const eventId = result.eventId || '';
+        if (result.clearFields) {
+          clearRegistrationFields();
+        }
         // Order: confirmed Meta Lead (once, with eventID) → privacy-safe analytics → fixed invite.
         // Destination is the owner-supplied constant only — never query/form/API/storage/referrer.
+        // Instagram username is never sent to analytics/logs — only the metrics registration POST.
         metaPixel.trackLead({
           registrationConfirmed: true,
           isThankYouDirectVisit: false,
@@ -641,6 +667,7 @@ function initRegistrationModal() {
         result?.retained || {
           fullName: payload.fullName,
           email: payload.email,
+          instagramUsername: payload.instagramUsername,
           consent: payload.consent,
         },
         GENERIC_REG_ERROR,
