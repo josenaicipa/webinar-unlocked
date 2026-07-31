@@ -21,6 +21,8 @@ import {
 import {
   FIXED_WHATSAPP_GROUP_INVITE,
   FALLBACK_THANK_YOU_PATH,
+  SUBMIT_PROCESSING_MESSAGE,
+  SUBMIT_PROCESSING_BUTTON_LABEL,
 } from './lib/post-registration.js';
 import {
   createMetaPixelController,
@@ -372,6 +374,9 @@ function initRegistrationModal() {
   let formStarted = false;
   let submitLocked = false;
 
+  // Captured once from the static markup so the busy label can be restored verbatim.
+  const submitBtnRestingLabel = submitBtn ? submitBtn.textContent : '';
+
   const GENERIC_REG_ERROR =
     'No se pudo completar el registro. Intenta de nuevo en unos minutos.';
 
@@ -590,6 +595,15 @@ function initRegistrationModal() {
     if (submitBtn) {
       submitBtn.disabled = true;
       submitBtn.setAttribute('aria-busy', 'true');
+      submitBtn.textContent = SUBMIT_PROCESSING_BUTTON_LABEL;
+    }
+    // Immediate, accessible feedback: announced before the webhook ACK arrives so the
+    // wait is never silent. Overwritten below by the branch that actually resolves
+    // (validation/error/pending/success), or left visible through the WhatsApp redirect.
+    if (statusEl) {
+      statusEl.textContent = SUBMIT_PROCESSING_MESSAGE;
+      statusEl.classList.add('is-pending');
+      statusEl.classList.remove('is-error');
     }
 
     try {
@@ -611,6 +625,12 @@ function initRegistrationModal() {
       }
 
       if (result.status === 'validation_error') {
+        // Never leave the "processing" copy up next to field-level error highlights;
+        // showFieldErrors only repopulates statusEl for timing/honeypot rejections.
+        if (statusEl) {
+          statusEl.textContent = '';
+          statusEl.classList.remove('is-pending', 'is-error');
+        }
         showFieldErrors(result.errors ?? {});
         trackFirstParty('validation_error');
         return;
@@ -692,6 +712,7 @@ function initRegistrationModal() {
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.removeAttribute('aria-busy');
+          submitBtn.textContent = submitBtnRestingLabel;
         }
       }
     }

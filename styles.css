@@ -263,6 +263,28 @@ a:hover {
   color: var(--gold);
 }
 
+/* Visible loading state: small spinning ring ahead of the busy label (pure CSS,
+   no markup change). Respects the reduced-motion override below (freezes as a
+   static ring instead of spinning). */
+.btn[aria-busy="true"]::before {
+  content: "";
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.6rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: 2px solid rgba(26, 20, 12, 0.35);
+  border-top-color: #1a140c;
+  animation: btn-spinner-spin 0.7s linear infinite;
+}
+
+@keyframes btn-spinner-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Hero */
 .hero {
   padding: var(--space-5) 0 var(--space-6);
