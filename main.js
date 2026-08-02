@@ -681,10 +681,12 @@ function initRegistrationModal() {
         if (result.clearFields) {
           clearRegistrationFields();
         }
-        // Order: confirmed Meta Lead (once, with eventID) → privacy-safe analytics → fixed invite.
+        // Order: confirmed Meta CompleteRegistration (once, with the stable eventID)
+        // → privacy-safe analytics → fixed invite. Reached only after the strict
+        // persisted ACK, and the client latches success so it cannot fire twice.
         // Destination is the owner-supplied constant only — never query/form/API/storage/referrer.
         // Instagram username is never sent to analytics/logs — only the n8n registration POST.
-        metaPixel.trackLead({
+        metaPixel.trackCompleteRegistration({
           registrationConfirmed: true,
           isThankYouDirectVisit: false,
           eventId,
@@ -764,7 +766,8 @@ function initYear() {
 function initAttributionBoot() {
   captureLandingAttribution();
   trackFirstParty('page_view');
-  // Meta PageView is emitted by the head snippet; controller is available for Lead.
+  // Meta PageView is emitted by the head snippet; the controller is reserved for
+  // the single post-ACK CompleteRegistration event.
   void META_PIXEL_ID;
   loadClarityDeferred();
 }

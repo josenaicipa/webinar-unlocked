@@ -17,7 +17,11 @@
     <title>Registro confirmado — Protocolo Unlocked</title>
     <link rel="stylesheet" href="../styles.css" />
     <link rel="icon" href="../assets/unlocked-mark.webp" type="image/webp" />
-    <!-- Meta Pixel present for PageView consistency; Lead is NOT fired on direct /gracias/ visits -->
+    <!--
+      Meta Pixel present for PageView consistency; CompleteRegistration is NOT
+      fired on direct /gracias/ visits. autoConfig is disabled for this page so
+      Meta automatic events cannot invent a registration success here.
+    -->
     <script>
       !(function (f, b, e, v, n, t, s) {
         if (f.fbq) return;
@@ -35,6 +39,7 @@
         s = b.getElementsByTagName(e)[0];
         s.parentNode.insertBefore(t, s);
       })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('set', 'autoConfig', 'false', '4207040806214515');
       fbq('init', '4207040806214515');
       fbq('track', 'PageView');
     </script>
@@ -132,10 +137,10 @@
         }
       }
 
-      // Never fire Lead on a direct /gracias/ visit.
-      // Lead already fires once on the landing after confirmed registration;
-      // this page only records a fail-closed no-op for direct visits.
-      createMetaPixelController().trackLead({
+      // Never fire the registration success event on a direct /gracias/ visit.
+      // CompleteRegistration already fires once on the landing after the confirmed
+      // ACK; this page only records a fail-closed no-op for direct visits.
+      createMetaPixelController().trackCompleteRegistration({
         registrationConfirmed: false,
         isThankYouDirectVisit: true,
       });

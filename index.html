@@ -26,7 +26,11 @@
     <title>Protocolo Unlocked — Clase en vivo | Unlocked Ecom</title>
     <link rel="stylesheet" href="./styles.css" />
     <link rel="icon" href="./assets/unlocked-mark.webp" type="image/webp" />
-    <!-- Meta Pixel 4207040806214515 — PageView only at load; Lead only after confirmed registration -->
+    <!--
+      Meta Pixel 4207040806214515 — PageView only at load; CompleteRegistration
+      only after the confirmed registration ACK. autoConfig is disabled for this
+      page so Meta automatic events cannot duplicate the explicit event.
+    -->
     <script>
       !(function (f, b, e, v, n, t, s) {
         if (f.fbq) return;
@@ -44,6 +48,7 @@
         s = b.getElementsByTagName(e)[0];
         s.parentNode.insertBefore(t, s);
       })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('set', 'autoConfig', 'false', '4207040806214515');
       fbq('init', '4207040806214515');
       fbq('track', 'PageView');
     </script>
