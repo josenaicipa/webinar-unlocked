@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Enlace corto de historias de Instagram hacia la clase en vivo Protocolo Unlocked."
+    />
+    <meta name="robots" content="noindex,nofollow" />
+    <link rel="canonical" href="https://webinar.unlockedecom.co/" />
+    <meta property="og:title" content="Protocolo Unlocked — clase en vivo" />
+    <meta
+      property="og:description"
+      content="Martes 4 de agosto de 2026, 7:00 PM hora de Colombia. En vivo y sin costo de inscripción."
+    />
+    <meta property="og:url" content="https://webinar.unlockedecom.co/" />
+    <title>Redirigiendo a Protocolo Unlocked</title>
+    <!--
+      Alias estático /ighist para historias de Instagram.
+      La atribución es fija y se escribe aquí como literal: nunca se deriva de la
+      query entrante, del hash, de cookies, de storage ni del referrer, así que
+      una visita manipulada no puede sobrescribir la campaña ni inyectar PII.
+      Destino único: la landing raíz con los cuatro parámetros utm aprobados.
+      Navegación primaria con location.replace para no dejar entrada en el
+      historial (el toque "atrás" vuelve a Instagram, no a este alias).
+    -->
+    <script>
+      window.location.replace(
+        '/?utm_source=instagram&utm_medium=organic_social&utm_campaign=webinar_20260804&utm_content=ighist',
+      );
+    </script>
+    <!-- Fallback sin JavaScript: refresco inmediato al mismo destino fijo. -->
+    <meta
+      http-equiv="refresh"
+      content="0; url=/?utm_source=instagram&amp;utm_medium=organic_social&amp;utm_campaign=webinar_20260804&amp;utm_content=ighist"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1.25rem;
+        background: #050505;
+        color: #f6f0e6;
+        font-family: Calibri, 'Segoe UI', Candara, 'Trebuchet MS', sans-serif;
+        font-size: 1.0625rem;
+        line-height: 1.65;
+        text-align: center;
+      }
+
+      .alias {
+        max-width: 26rem;
+      }
+
+      .alias__eyebrow {
+        margin: 0 0 0.5rem;
+        font-size: 0.8125rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #d6b06d;
+      }
+
+      .alias__title {
+        margin: 0 0 0.75rem;
+        font-family: Georgia, 'Times New Roman', 'Liberation Serif', Times, serif;
+        font-size: 1.5rem;
+        line-height: 1.25;
+      }
+
+      .alias__note {
+        margin: 0 0 1.5rem;
+        color: rgba(246, 240, 230, 0.72);
+      }
+
+      .alias__link {
+        display: inline-block;
+        padding: 0.875rem 1.5rem;
+        border: 1px solid #d6b06d;
+        border-radius: 4px;
+        background: #d6b06d;
+        color: #050505;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .alias__link:focus-visible {
+        outline: 2px solid #f6f0e6;
+        outline-offset: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="alias">
+      <p class="alias__eyebrow">Protocolo Unlocked</p>
+      <h1 class="alias__title">Te estamos llevando a la clase en vivo</h1>
+      <p class="alias__note">
+        Si tu navegador no continúa solo, abre la página de registro con el botón de abajo.
+      </p>
+      <a
+        class="alias__link"
+        id="ighist-continue"
+        href="/?utm_source=instagram&amp;utm_medium=organic_social&amp;utm_campaign=webinar_20260804&amp;utm_content=ighist"
+        >Ir a la página del webinar</a
+      >
+    </main>
+  </body>
+</html>
