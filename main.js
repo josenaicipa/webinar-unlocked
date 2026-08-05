@@ -10,6 +10,8 @@ import {
   REGISTRATION_ENDPOINT,
   REGISTRATION_EVENT,
   REGISTRATION_SURFACE,
+  findMissingRequiredFields,
+  validateRegistration,
 } from './lib/registration.js';
 import {
   createAttributionTracker,
@@ -589,6 +591,16 @@ function initRegistrationModal() {
       filledAt,
       submittedAt: Date.now(),
     };
+
+    // Every visible field is mandatory: block here, before the submit lock, the busy
+    // state and any transport call, so an incomplete form never becomes a submit
+    // attempt. The registration client re-validates as defense in depth.
+    const missingRequired = findMissingRequiredFields(payload);
+    if (missingRequired.length > 0) {
+      showFieldErrors(validateRegistration(payload).errors ?? {});
+      trackFirstParty('validation_error');
+      return;
+    }
 
     submitLocked = true;
     let keepLocked = false;
