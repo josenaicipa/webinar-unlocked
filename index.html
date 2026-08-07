@@ -350,7 +350,7 @@
             <p class="entrada__price">Acceso gratuito</p>
             <p>
               Esta edición en vivo de <strong>Protocolo Unlocked</strong> no tiene costo
-              de inscripción. Reserva tu lugar con nombre, correo, teléfono y usuario de Instagram; al confirmar verás
+              de inscripción. Reserva tu lugar con nombre, correo, teléfono y usuario de Instagram (opcional); al confirmar verás
               la fecha exacta y podrás guardarla en tu calendario.
             </p>
             <p class="entrada__note">
@@ -562,7 +562,7 @@
               </h3>
               <div class="faq__panel" id="faq-panel-8" role="region" aria-labelledby="faq-btn-8" hidden>
                 <p>
-                  Unlocked Ecom puede usar tu nombre, correo, teléfono y usuario de Instagram solo para gestionar el registro
+                  Unlocked Ecom puede usar tu nombre, correo, teléfono y usuario de Instagram (opcional) solo para gestionar el registro
                   de esta clase y comunicaciones directamente relacionadas con Protocolo Unlocked.
                 </p>
               </div>
@@ -577,7 +577,7 @@
           <h2 id="final-cta-title">Reserva tu lugar en Protocolo Unlocked</h2>
           <p>
             Martes 11 de agosto 2026 · 7:00 PM Colombia · En vivo y sin costo de inscripción.
-            Toma dos minutos: nombre, correo, teléfono, usuario de Instagram y confirmación.
+            Toma dos minutos: nombre, correo, teléfono, usuario de Instagram (opcional) y confirmación.
           </p>
           <button type="button" class="btn btn--primary btn--lg js-open-register" data-cta="final">
             Reservar mi cupo gratis
@@ -636,7 +636,7 @@
           </button>
         </header>
         <p class="modal__microcopy" id="modal-microcopy">
-          Clase en vivo · martes 11 de agosto 2026 · 7:00 PM Colombia. Nombre, correo, teléfono y usuario de Instagram.
+          Clase en vivo · martes 11 de agosto 2026 · 7:00 PM Colombia. Nombre, correo, teléfono y usuario de Instagram (opcional).
         </p>
         <form id="register-form" class="register-form" novalidate aria-describedby="modal-microcopy">
           <div class="field">
@@ -687,7 +687,7 @@
             <p class="field__error" id="error-phone" role="alert" hidden></p>
           </div>
           <div class="field">
-            <label for="instagramUsername">Usuario de Instagram</label>
+            <label for="instagramUsername">Usuario de Instagram (opcional)</label>
             <input
               id="instagramUsername"
               name="instagramUsername"
@@ -695,12 +695,13 @@
               autocomplete="username"
               inputmode="text"
               spellcheck="false"
-              required
-              aria-required="true"
               maxlength="31"
               placeholder="@tuusuario"
-              aria-describedby="error-instagramUsername"
+              aria-describedby="hint-instagramUsername error-instagramUsername"
             />
+            <p class="field__hint" id="hint-instagramUsername">
+              Es opcional: puedes dejarlo vacío y tu registro se completa igual.
+            </p>
             <p class="field__error" id="error-instagramUsername" role="alert" hidden></p>
           </div>
           <div class="field field--checkbox">
@@ -714,7 +715,7 @@
               aria-describedby="error-consent"
             />
             <label for="consent">
-              Acepto que Unlocked Ecom use mi nombre, correo, teléfono y usuario de Instagram solo para gestionar el registro
+              Acepto que Unlocked Ecom use mi nombre, correo, teléfono y usuario de Instagram (opcional) solo para gestionar el registro
               de esta clase y comunicaciones directamente relacionadas con Protocolo Unlocked.
             </label>
             <p class="field__error" id="error-consent" role="alert" hidden></p>
@@ -737,7 +738,7 @@
           <p class="form-footnote">
             Al confirmar, tu registro se procesa en segundos: verás un aviso en pantalla y te
             llevaremos al siguiente paso para completar tu inscripción. Usamos nombre, correo,
-            teléfono y usuario de Instagram solo para este registro.
+            teléfono y usuario de Instagram (opcional) solo para este registro.
           </p>
         </form>
       </div>
