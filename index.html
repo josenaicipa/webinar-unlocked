@@ -27,9 +27,11 @@
     <link rel="stylesheet" href="./styles.css" />
     <link rel="icon" href="./assets/unlocked-mark.webp" type="image/webp" />
     <!--
-      Meta Pixel 4207040806214515 — PageView only at load; CompleteRegistration
-      only after the confirmed registration ACK. autoConfig is disabled for this
-      page so Meta automatic events cannot duplicate the explicit event.
+      Meta Pixel 4207040806214515 — PageView only. CompleteRegistration is never
+      emitted from the browser: the confirmed server path (n8n) sends it via the
+      Conversions API, keyed on the same event_id as the registration POST.
+      autoConfig is disabled for this page so Meta automatic events cannot
+      invent a registration success client-side.
     -->
     <script>
       !(function (f, b, e, v, n, t, s) {
@@ -733,7 +735,7 @@
           </div>
           <p class="form-status" id="form-status" role="status" aria-live="polite" tabindex="-1"></p>
           <button type="submit" class="btn btn--primary btn--block" id="submit-btn">
-            Confirmar mi registro
+            Finalizar mi registro
           </button>
           <p class="form-footnote">
             Al confirmar, tu registro se procesa en segundos: verás un aviso en pantalla y te

@@ -26,11 +26,7 @@ import {
   SUBMIT_PROCESSING_MESSAGE,
   SUBMIT_PROCESSING_BUTTON_LABEL,
 } from './lib/post-registration.js';
-import {
-  createMetaPixelController,
-  loadClarityDeferred,
-  META_PIXEL_ID,
-} from './lib/tracking.js';
+import { loadClarityDeferred, META_PIXEL_ID } from './lib/tracking.js';
 import { buildLazyPlayerDescriptors } from './lib/testimonials.js';
 import {
   runInitializersSafely,
@@ -138,8 +134,6 @@ function trackFirstParty(eventName, extra) {
     // never block UX
   }
 }
-
-const metaPixel = createMetaPixelController();
 
 /* -------------------------------------------------------------------------- */
 /* Countdown                                                                  */
@@ -693,16 +687,15 @@ function initRegistrationModal() {
         if (result.clearFields) {
           clearRegistrationFields();
         }
-        // Order: confirmed Meta CompleteRegistration (once, with the stable eventID)
-        // → privacy-safe analytics → fixed invite. Reached only after the strict
-        // persisted ACK, and the client latches success so it cannot fire twice.
+        // Order: privacy-safe first-party analytics → fixed invite. Reached only
+        // after the strict persisted ACK, and the client latches success so it
+        // cannot run twice.
+        // Meta CompleteRegistration is intentionally NOT fired here: the confirmed
+        // server path (n8n) emits it via the Conversions API after the registration
+        // writes succeed, keyed on the same `event_id` already carried in the
+        // registration POST, so the conversion is counted exactly once.
         // Destination is the owner-supplied constant only — never query/form/API/storage/referrer.
         // Instagram username is never sent to analytics/logs — only the n8n registration POST.
-        metaPixel.trackCompleteRegistration({
-          registrationConfirmed: true,
-          isThankYouDirectVisit: false,
-          eventId,
-        });
         trackFirstParty('registration_success', { event_id: eventId });
         keepLocked = true;
         window.location.assign(FIXED_WHATSAPP_GROUP_INVITE);
@@ -778,8 +771,8 @@ function initYear() {
 function initAttributionBoot() {
   captureLandingAttribution();
   trackFirstParty('page_view');
-  // Meta PageView is emitted by the head snippet; the controller is reserved for
-  // the single post-ACK CompleteRegistration event.
+  // Meta PageView is emitted by the inline head snippet. No registration
+  // conversion is emitted from the browser at all — see lib/tracking.js.
   void META_PIXEL_ID;
   loadClarityDeferred();
 }

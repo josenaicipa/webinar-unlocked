@@ -18,9 +18,10 @@
     <link rel="stylesheet" href="../styles.css" />
     <link rel="icon" href="../assets/unlocked-mark.webp" type="image/webp" />
     <!--
-      Meta Pixel present for PageView consistency; CompleteRegistration is NOT
-      fired on direct /gracias/ visits. autoConfig is disabled for this page so
-      Meta automatic events cannot invent a registration success here.
+      Meta Pixel present for PageView consistency; CompleteRegistration is never
+      emitted from the browser, on this page or the landing. The confirmed server
+      path (n8n) sends it via the Conversions API. autoConfig is disabled for this
+      page so Meta automatic events cannot invent a registration success here.
     -->
     <script>
       !(function (f, b, e, v, n, t, s) {
@@ -115,7 +116,6 @@
         buildGoogleCalendarUrl,
         buildIcsDataUri,
       } from '../lib/calendar.js';
-      import { createMetaPixelController } from '../lib/tracking.js';
 
       const gcal = document.getElementById('gcal-link');
       if (gcal) gcal.href = buildGoogleCalendarUrl();
@@ -136,14 +136,6 @@
           // Keep honest no-JS / failure copy; never enable a broken # download.
         }
       }
-
-      // Never fire the registration success event on a direct /gracias/ visit.
-      // CompleteRegistration already fires once on the landing after the confirmed
-      // ACK; this page only records a fail-closed no-op for direct visits.
-      createMetaPixelController().trackCompleteRegistration({
-        registrationConfirmed: false,
-        isThankYouDirectVisit: true,
-      });
     </script>
   </body>
 </html>
