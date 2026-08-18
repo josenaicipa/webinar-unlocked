@@ -27,6 +27,7 @@ import {
   SUBMIT_PROCESSING_BUTTON_LABEL,
 } from './lib/post-registration.js';
 import { loadClarityDeferred, META_PIXEL_ID } from './lib/tracking.js';
+import { createOpenPanelClient } from './lib/openpanel.js';
 import { buildLazyPlayerDescriptors } from './lib/testimonials.js';
 import {
   runInitializersSafely,
@@ -130,6 +131,24 @@ function trackFirstParty(eventName, extra) {
     if (result && typeof /** @type {{ catch?: unknown }} */ (result).catch === 'function') {
       void /** @type {Promise<unknown>} */ (result).catch(() => null);
     }
+  } catch {
+    // never block UX
+  }
+}
+
+const openPanel = createOpenPanelClient({
+  attributionSnapshot: () => attributionTracker.getSnapshot(),
+  pageContext: () => browserPageContext(),
+});
+
+/**
+ * OpenPanel is additive and fire-and-forget. A throw or network failure
+ * must never block first-party analytics, Meta, registration or redirect.
+ * @param {() => unknown} fn
+ */
+function trackOpenPanelSafely(fn) {
+  try {
+    fn();
   } catch {
     // never block UX
   }
@@ -486,6 +505,7 @@ function initRegistrationModal() {
       e.preventDefault();
       const source = btn.getAttribute('data-cta') || 'unknown';
       trackFirstParty('cta_click', { cta: source });
+      trackOpenPanelSafely(() => openPanel.trackCtaClicked(source));
       openModal(source);
     });
   });
@@ -501,6 +521,7 @@ function initRegistrationModal() {
     if (formStarted) return;
     formStarted = true;
     trackFirstParty('form_start');
+    trackOpenPanelSafely(() => openPanel.trackFormStarted());
   }, { once: false });
 
   document.addEventListener('keydown', (e) => {
@@ -687,9 +708,9 @@ function initRegistrationModal() {
         if (result.clearFields) {
           clearRegistrationFields();
         }
-        // Order: privacy-safe first-party analytics → fixed invite. Reached only
-        // after the strict persisted ACK, and the client latches success so it
-        // cannot run twice.
+        // Order: privacy-safe first-party analytics → OpenPanel webinar_registered
+        // → fixed invite. Reached only after the strict persisted ACK, and the
+        // client latches success so it cannot run twice.
         // Meta CompleteRegistration is intentionally NOT fired here: the confirmed
         // server path (n8n) emits it via the Conversions API after the registration
         // writes succeed, keyed on the same `event_id` already carried in the
@@ -697,6 +718,13 @@ function initRegistrationModal() {
         // Destination is the owner-supplied constant only — never query/form/API/storage/referrer.
         // Instagram username is never sent to analytics/logs — only the n8n registration POST.
         trackFirstParty('registration_success', { event_id: eventId });
+        trackOpenPanelSafely(() =>
+          openPanel.trackRegistered({
+            registrationConfirmed: true,
+            ackComplete: true,
+            eventId,
+          }),
+        );
         keepLocked = true;
         window.location.assign(FIXED_WHATSAPP_GROUP_INVITE);
         return;
@@ -771,6 +799,10 @@ function initYear() {
 function initAttributionBoot() {
   captureLandingAttribution();
   trackFirstParty('page_view');
+  trackOpenPanelSafely(() => {
+    openPanel.init();
+    openPanel.trackScreenView();
+  });
   // Meta PageView is emitted by the inline head snippet. No registration
   // conversion is emitted from the browser at all — see lib/tracking.js.
   void META_PIXEL_ID;

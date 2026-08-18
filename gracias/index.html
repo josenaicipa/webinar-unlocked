@@ -17,6 +17,7 @@
     <title>Registro confirmado — Protocolo Unlocked</title>
     <link rel="stylesheet" href="../styles.css" />
     <link rel="icon" href="../assets/unlocked-mark.webp" type="image/webp" />
+    <link rel="dns-prefetch" href="https://analytics.unlockedecom.co" />
     <!--
       Meta Pixel present for PageView consistency; CompleteRegistration is never
       emitted from the browser, on this page or the landing. The confirmed server
@@ -116,6 +117,11 @@
         buildGoogleCalendarUrl,
         buildIcsDataUri,
       } from '../lib/calendar.js';
+      import {
+        createAttributionTracker,
+        sanitizePageContext,
+      } from '../lib/attribution.js';
+      import { createOpenPanelClient } from '../lib/openpanel.js';
 
       const gcal = document.getElementById('gcal-link');
       if (gcal) gcal.href = buildGoogleCalendarUrl();
@@ -135,6 +141,37 @@
         } catch {
           // Keep honest no-JS / failure copy; never enable a broken # download.
         }
+      }
+
+      // Direct /gracias visits are not a confirmed registration ACK. The
+      // registration-success OpenPanel event stays on the landing, after the
+      // complete n8n persisted-write receipt.
+      try {
+        const attributionTracker = createAttributionTracker({
+          localStorage: typeof localStorage !== 'undefined' ? localStorage : undefined,
+          sessionStorage: typeof sessionStorage !== 'undefined' ? sessionStorage : undefined,
+        });
+        try {
+          attributionTracker.captureFromParams(
+            new URLSearchParams(typeof location !== 'undefined' ? location.search : ''),
+          );
+        } catch {
+          // attribution is best-effort
+        }
+        const openPanel = createOpenPanelClient({
+          attributionSnapshot: () => attributionTracker.getSnapshot(),
+          pageContext: () =>
+            sanitizePageContext({
+              path: typeof location !== 'undefined' ? location.pathname : '/gracias/',
+              referrer: typeof document !== 'undefined' ? document.referrer : '',
+              title: typeof document !== 'undefined' ? document.title : '',
+            }),
+        });
+        openPanel.init();
+        openPanel.trackScreenView();
+        openPanel.trackThankYouViewed();
+      } catch {
+        // OpenPanel must never block the confirmation page.
       }
     </script>
   </body>
